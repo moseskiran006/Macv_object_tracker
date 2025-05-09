@@ -1,17 +1,6 @@
 # MacV Object Tracker
 
-![Object Tracking Demo](demo.gif) *Example of object tracking with tail lines*
 
-## Table of Contents
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Output Format](#output-format)
-- [Technical Approach](#technical-approach)
-- [Evaluation Metrics](#evaluation-metrics)
-- [Troubleshooting](#troubleshooting)
-- [Future Improvements](#future-improvements)
-- [License](#license)
 
 ## Features
 
@@ -53,4 +42,17 @@ source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 
 # Install dependencies
+
 pip install -r requirements.txt
+```
+##Command Line Interface
+```bash
+python object_tracker.py \
+    --input input.mp4 \
+    --output output.webm \
+    --config config.yaml
+```
+##Web Interface
+```bash
+python app.py
+```
