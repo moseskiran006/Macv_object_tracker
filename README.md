@@ -49,6 +49,8 @@ pip install -r requirements.txt
 ```bash
 python app.py
 ```
+##You will be forwarded towards web page http://127.0.0.1:5000
+##upload the video and after few seconds you can see the tracked video
 ##Command Line Interface
 ```bash
 python object_tracker.py \
