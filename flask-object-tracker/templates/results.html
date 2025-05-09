@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MacV Object Tracker - Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .video-container {
+            background: #000;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        video {
+            width: 100%;
+            display: block;
+        }
+        .metrics {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .back-btn {
+            display: inline-block;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .back-btn:hover {
+            background-color: #555;
+        }
+        .processing-info {
+            background: #e7f3fe;
+            border-left: 6px solid #2196F3;
+            padding: 10px 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Object Tracking Results</h1>
+    
+    <div class="processing-info">
+        <p>Video processing completed. Below are your tracking results.</p>
+    </div>
+    
+    <div class="video-container">
+        <video controls autoplay>
+            <source src="{{ url_for('static', filename='results/' + video) }}" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <div class="metrics">
+        <h2>Tracking Metrics</h2>
+        <pre id="metrics-data">Loading metrics...</pre>
+    </div>
+    
+    <a href="{{ url_for('upload_file') }}" class="back-btn">Process Another Video</a>
+    
+    <script>
+        // Load and display the metrics report
+        fetch("{{ url_for('static', filename='results/' + report) }}")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('metrics-data').textContent = data;
+            })
+            .catch(error => {
+                console.error('Error loading metrics:', error);
+                document.getElementById('metrics-data').textContent = 'Error loading metrics data.';
+            });
+    </script>
+</body>
+</html>
