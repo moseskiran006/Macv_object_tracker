@@ -34,7 +34,7 @@
 ```bash
 # Clone repository
 git clone https://github.com/moseskiran006/Macv_object_tracker.git
-cd macv-object-tracker
+cd flask-object-tracker
 
 # Create virtual environment (recommended)
 python -m venv venv
