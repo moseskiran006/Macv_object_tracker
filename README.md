@@ -33,7 +33,7 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/macv-object-tracker.git
+git clone https://github.com/moseskiran006/Macv_object_tracker.git
 cd macv-object-tracker
 
 # Create virtual environment (recommended)
