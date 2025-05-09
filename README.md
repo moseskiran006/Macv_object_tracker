@@ -45,6 +45,10 @@ venv\Scripts\activate     # Windows
 
 pip install -r requirements.txt
 ```
+##Web Interface
+```bash
+python app.py
+```
 ##Command Line Interface
 ```bash
 python object_tracker.py \
@@ -52,7 +56,4 @@ python object_tracker.py \
     --output output.webm \
     --config config.yaml
 ```
-##Web Interface
-```bash
-python app.py
-```
+
