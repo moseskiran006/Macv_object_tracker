@@ -1,96 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MacV Object Tracker - Results</title>
+    <title>Tracking Results</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .video-container {
-            background: #000;
-            margin: 20px 0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        video {
-            width: 100%;
-            display: block;
-        }
-        .metrics {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        pre {
-            background: #f8f8f8;
-            padding: 10px;
-            border-radius: 3px;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        .back-btn {
-            display: inline-block;
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-top: 20px;
-        }
-        .back-btn:hover {
-            background-color: #555;
-        }
-        .processing-info {
-            background: #e7f3fe;
-            border-left: 6px solid #2196F3;
-            padding: 10px 15px;
-            margin: 20px 0;
-        }
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        video { width: 100%; background: #000; margin: 20px 0; }
+        .results-container { background: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .metrics { background: #fff; padding: 15px; border-radius: 4px; margin: 20px 0; }
+        pre { white-space: pre-wrap; word-wrap: break-word; background: #f1f1f1; padding: 10px; border-radius: 4px; }
+        .btn { display: inline-block; padding: 10px 15px; text-decoration: none; border-radius: 4px; margin-right: 10px; }
+        .btn-download { background: #28a745; color: white; }
+        .btn-download:hover { background: #218838; }
+        .btn-back { background: #6c757d; color: white; }
+        .btn-back:hover { background: #5a6268; }
+        .file-info { color: #6c757d; margin-bottom: 20px; }
+        .loading { text-align: center; padding: 20px; }
+        .video-container { position: relative; }
+        .video-fallback { display: none; padding: 20px; text-align: center; background: #f1f1f1; }
+        .video-error { color: #721c24; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin-top: 10px; display: none; }
+        .retry-btn { background: #007bff; color: white; padding: 8px 16px; border-radius: 4px; display: inline-block; margin-top: 10px; text-decoration: none; }
     </style>
 </head>
 <body>
-    <h1>Object Tracking Results</h1>
+    <h1>Tracking Results</h1>
     
-    <div class="processing-info">
-        <p>Video processing completed. Below are your tracking results.</p>
+    <div class="results-container">
+        <div class="file-info">
+            Processed video ({{ video_size }}MB)
+        </div>
+        
+        <div class="video-container">
+            <!-- Use the stream endpoint for better compatibility -->
+            <video id="trackingVideo" controls autoplay muted>
+                <source src="{{ url_for('stream_video', filename=video) }}" type="video/mp4">
+                Your browser does not support HTML5 video.
+            </video>
+            <div class="video-fallback" id="videoFallback">
+                Video cannot be displayed. You can still download it using the button below.
+            </div>
+            <div class="video-error" id="videoError">
+                There was an error loading the video in your browser. 
+                <a href="{{ url_for('static', filename='results/' + video) }}" class="retry-btn" download>Download Video</a>
+            </div>
+        </div>
+        
+        <div class="metrics">
+            <h2>Tracking Metrics</h2>
+            <div class="loading" id="loading-metrics">Loading metrics...</div>
+            <pre id="metrics-data" style="display: none;"></pre>
+        </div>
+        
+        <div>
+            <a href="{{ url_for('static', filename='results/' + video) }}" class="btn btn-download" download>Download Video</a>
+            <a href="{{ url_for('static', filename='results/' + report) }}" class="btn btn-download" download>Download Report</a>
+            <a href="{{ url_for('upload_file') }}" class="btn btn-back">Process Another Video</a>
+        </div>
     </div>
-    
-    <div class="video-container">
-        <video controls autoplay>
-            <source src="{{ url_for('static', filename='results/' + video) }}" type="video/webm">
-            Your browser does not support the video tag.
-        </video>
-    </div>
-    
-    <div class="metrics">
-        <h2>Tracking Metrics</h2>
-        <pre id="metrics-data">Loading metrics...</pre>
-    </div>
-    
-    <a href="{{ url_for('upload_file') }}" class="back-btn">Process Another Video</a>
     
     <script>
-        // Load and display the metrics report
+        // Check if video can be played
+        const video = document.getElementById('trackingVideo');
+        const fallback = document.getElementById('videoFallback');
+        const errorMsg = document.getElementById('videoError');
+        
+        // Event listeners for video errors
+        video.addEventListener('error', function(e) {
+            console.error('Video error:', e);
+            video.style.display = 'none';
+            fallback.style.display = 'block';
+            errorMsg.style.display = 'block';
+        });
+        
+        // Try alternative source if video doesn't play within 3 seconds
+        let playTimeout = setTimeout(function() {
+            if (video.readyState === 0) {  // HAVE_NOTHING state
+                console.log('Video not loading, trying direct source');
+                video.src = "{{ url_for('static', filename='results/' + video) }}";
+                video.load();
+            }
+        }, 3000);
+        
+        // Clear timeout if video starts loading
+        video.addEventListener('loadedmetadata', function() {
+            clearTimeout(playTimeout);
+        });
+
+        // Load metrics report
         fetch("{{ url_for('static', filename='results/' + report) }}")
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to load report');
+                return response.text();
+            })
             .then(data => {
+                document.getElementById('loading-metrics').style.display = 'none';
+                document.getElementById('metrics-data').style.display = 'block';
                 document.getElementById('metrics-data').textContent = data;
             })
             .catch(error => {
-                console.error('Error loading metrics:', error);
-                document.getElementById('metrics-data').textContent = 'Error loading metrics data.';
+                console.error('Error:', error);
+                document.getElementById('loading-metrics').style.display = 'none';
+                document.getElementById('metrics-data').style.display = 'block';
+                document.getElementById('metrics-data').textContent = 'Error loading metrics report: ' + error.message;
             });
     </script>
 </body>
